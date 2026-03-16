@@ -177,4 +177,25 @@
     <string id="st_data_export_falloff">
         <text>Потеря мощности</text>
     </string>
+    <string id="st_data_export_stash_map">
+        <text>Уровень</text>
+    </string>
+    <string id="st_data_export_stash_type">
+        <text>Тип схрона</text>
+    </string>
+    <string id="st_data_export_stash_item">
+        <text>Предмет</text>
+    </string>
+    <string id="st_data_export_stash_chance">
+        <text>Шанс %</text>
+    </string>
+    <string id="st_data_export_stash_ecos">
+        <text>Экономика</text>
+    </string>
+    <string id="st_data_export_stash_type_common">
+        <text>Обычный</text>
+    </string>
+    <string id="st_data_export_stash_type_rare">
+        <text>Редкий</text>
+    </string>
 </string_table>

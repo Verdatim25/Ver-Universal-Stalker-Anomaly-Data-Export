@@ -177,4 +177,25 @@
     <string id="st_data_export_falloff">
         <text>Falloff</text>
     </string>
+    <string id="st_data_export_stash_map">
+        <text>Map</text>
+    </string>
+    <string id="st_data_export_stash_type">
+        <text>Stash Type</text>
+    </string>
+    <string id="st_data_export_stash_item">
+        <text>Item</text>
+    </string>
+    <string id="st_data_export_stash_chance">
+        <text>Chance %</text>
+    </string>
+    <string id="st_data_export_stash_ecos">
+        <text>Allowed Ecos</text>
+    </string>
+    <string id="st_data_export_stash_type_common">
+        <text>Common</text>
+    </string>
+    <string id="st_data_export_stash_type_rare">
+        <text>Rare</text>
+    </string>
 </string_table>
