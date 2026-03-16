@@ -2450,11 +2450,9 @@ end
 function debug_cmd_list.cmd.item_drop_locations(_, txt, x)
     x:SendOutput("[START] export stash drop rates by item")
 
-    local use_item_names = false  -- set to true to output display names instead of section IDs
-
     -- Load config files
-    local ini_tm   = ini_file("items\\settings\\grok_treasure_manager.ltx")
-    local ini_tier = ini_file("items\\settings\\grok_items_tier.ltx")
+    local ini_tm   = treasure_manager.ini_treasure
+    local ini_tier = treasure_manager.ini_tiers
 
     -- Parse kind/tier effects for common and rare stash types
     local kind_effects = { common = {}, rare = {} }
@@ -2581,7 +2579,7 @@ function debug_cmd_list.cmd.item_drop_locations(_, txt, x)
     -- Write rows: two rows per item (common, rare), maps sorted desc by chance
     local row_count = 0
     for section, item in spairs(items) do
-        local label = use_item_names and item.name or section
+        local label = section
         for _, stash_type in ipairs({ "common", "rare" }) do
             local map_list = item_maps[section] and item_maps[section][stash_type]
             if map_list and #map_list > 0 then
