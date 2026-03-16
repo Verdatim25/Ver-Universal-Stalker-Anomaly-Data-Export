@@ -61,6 +61,13 @@ function to_percent_round(value)
     return to_percent_string(round(value))
 end
 
+function to_percent_stash(value)
+    if value > 0 and value < 1 then
+        return string.format("%.2f", value) .. "%"
+    end
+    return to_percent_round(value)
+end
+
 function decimal_to_percent(value)
     return to_percent_floor(tonumber(value) * 100)
 end
@@ -2435,7 +2442,7 @@ function debug_cmd_list.cmd.export_stash_drop_rates(_, txt, x)
             for _, entry in ipairs(row_items) do
                 row = row
                     .. ", " .. entry.label
-                    .. ", " .. to_percent_round(entry.pct)
+                    .. ", " .. to_percent_stash(entry.pct)
                     .. ", " .. entry.allowed_ecos
             end
             out:write(row .. "\n")
@@ -2587,7 +2594,7 @@ function debug_cmd_list.cmd.item_drop_locations(_, txt, x)
                 for _, entry in ipairs(map_list) do
                     row = row
                         .. ", " .. game.translate_string(entry.map)
-                        .. ", " .. to_percent_round(entry.pct)
+                        .. ", " .. to_percent_stash(entry.pct)
                         .. ", " .. item.allowed_ecos
                 end
                 out:write(row .. "\n")
