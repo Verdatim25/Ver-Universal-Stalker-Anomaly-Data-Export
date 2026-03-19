@@ -464,7 +464,7 @@ function getEatableSleepiness(section)
     local sleep_mult = get_local_val([[gamedata\scripts\actor_status_sleep.script]], "actor_status_sleep", "local eat_sleepiness_mul") or 1000
     eat_sleepiness = eat_sleepiness * sleep_mult
     local sleep_num = eat_sleepiness / max_sleep * 100
-    return sleep_num
+    return tonumber(string.format("%.2f", sleep_num))
 end
 
 function getEatableThirstiness(section)
@@ -1118,38 +1118,53 @@ local ammo_special_types = {
     ["338"] = ".338 Federal",
 }
 
+local blacklist_ammo = {
+    ["_knife"] = true,
+    ["_binoc"] = true,
+    ["_base$"] = true,
+    ["_dyno$"] = true,
+    ["_batteries"] = true,
+    ["^mp_"] = true,
+    ["_bad$"] = true,
+    ["_verybad$"] = true,
+    ["_heli$"] = true,
+    ["_parts$"] = true,
+    ["^casing_"] = true,
+    ["^powder_"] = true,
+    ["^bullet_"] = true,
+}
+
+function is_blacklisted_ammo(section)
+    for black, _ in pairs(blacklist_ammo) do
+        if string.find(section, black) then
+            return true
+        end
+    end
+    return false
+end
+
 function get_weapon_caliber(ammo_class)
     --printf("ammo_class: %s", ammo_class)
     local ammo_tbl = str_explode(ammo_class, ",")
     if #ammo_tbl == 0 then
         return ""
     end
-    local ammo_types = {}
+    local ammo_list = ""
 
     for i, ammo in ipairs(ammo_tbl) do
         --printf("ammo: %s", ammo)
-        local regular_start, regular_end = string.find(ammo, "[0-9.]*x[0-9]*")
-        if regular_start then
-            ammo_types[string.sub(ammo, regular_start, regular_end)] = true
-        else
-            for ammo_type, label in pairs(ammo_special_types) do
-                local special_start, special_end = string.find(ammo, ammo_type)
-                --printf("try: %s - %s", ammo_type, special_start)
-                if special_start then
-                    ammo_types[label] = true
-                end
-            end
+        if is_blacklisted_ammo(ammo) then
+            goto continue
         end
-    end
 
-    local ammo_list = ""
-
-    for ammo_type, _ in pairs(ammo_types) do
+        local ammo_name = sanitize_ammo_name(translate_with_context(ini_sys:r_string_ex(ammo, "inv_name"), "item name for " .. ammo))
         if ammo_list == "" then
-            ammo_list = ammo_type
+            ammo_list = ammo_name
         else
-            ammo_list = ammo_list .. "; " .. ammo_type
+            local space = headers_mode == 0 and " " or ""
+            ammo_list = ammo_list .. ";" .. space .. ammo_name
         end
+        ::continue::
     end
 
     return ammo_list
@@ -1742,29 +1757,11 @@ end
 function debug_cmd_list.cmd.export_ammo(_, txt, x)
     x:SendOutput("[START] export ammo")
 
-    local blacklist = {
-        ["_knife"] = true,
-        ["_binoc"] = true,
-        ["_base$"] = true,
-        ["_dyno$"] = true,
-        ["_batteries"] = true,
-        ["^mp_"] = true,
-        ["_bad$"] = true,
-        ["_verybad$"] = true,
-        ["_heli$"] = true,
-        ["_parts$"] = true,
-        ["^casing_"] = true,
-        ["^powder_"] = true,
-        ["^bullet_"] = true,
-    }
-
     local tbl = {}
     local cnt = 0
     ini_sys:section_for_each(function(section)
-        for black, _ in pairs(blacklist) do
-            if string.find(section, black) then
-                return
-            end
+        if is_blacklisted_ammo(section) then
+            return
         end
 
         local kind = ini_sys:r_string_ex(section, "kind") -- special class name for the sake of correct listing

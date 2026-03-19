@@ -279,7 +279,7 @@ st_wpn_groza_guns_nimble,ОЦ-14-1А «Гроза Долга»
 st_salmon,Копчёный лосось
 st_itm_sleepbag_name,Спальный мешок
 st_equ_milpack_name,Армейский рюкзак
-st_data_export_stash_map,Уровень
+st_data_export_stash_map,Локация
 st_itm_mapkit_5,Карта аномалий (Кладбище техники)
 st_data_export_post_heal_head,Полностью голову
 st_compression_bag,Компрессионный мешок
@@ -499,9 +499,9 @@ st_data_export_has_perk,Имеет перк
 st_wpn_sig220_n,Sig Sauer P220
 ui_inv_outfit_telepatic_protection,Пси-защита
 st_wpn_vihrn,СР-3М «Вихрь»
-st_data_export_weapon_degradation,Доп. износ оружия
+st_data_export_weapon_degradation,Износ оружия
 st_wpn_svd_custom,Модифицированная СВД
-st_data_fragment_damage,Урон от фрагментов
+st_data_fragment_damage,Осколочный урон
 st_wpn_pkp,ПКП «Печенег»
 dolg_heavy_proto_exo_outfit_name,ПСЗ-9д «Броня "Долга"» с протоэкзоскелетом
 st_akvatab,Ибупрофен
@@ -710,7 +710,7 @@ st_wpn_g36new_nimble,G36 «СТРАХ»
 st_wpn_sig550_sniper,SIG SG550-1 Sniper
 st_prt_o_fabrics_3,Прочный текстиль
 exo_wood_outfit_name,ТБ-1 «Лес»
-st_wpn_l85_m1,L85 A2
+st_data_export_light_attack_power,Сила легкой атаки
 st_wpn_saiga12s_m1,Сайга-12 "Научник"
 st_wpn_sig220,SIG P220
 st_wpn_scar_siber_m1_black,FN SCAR-H Тактический чёрный
@@ -770,65 +770,65 @@ l10_radar,Радар
 st_wpn_m79,M79
 ui_inv_rate_of_fire,Темп огня
 st_gloves,Кожаные перчатки
-st_data_export_pelts_quality_max,Максимальное качество шкуры
-st_data_export_cuts_thick_skin,Режет толстую кожу
-st_drug_radioprotector,Радиопротектор
-st_itm_mapkit_3,Карта аномалий (Рыжий лес)
-BR,BR
-st_af_dummy_dummy_name,«Панцирь»
-st_hide_psysucker_name,Кожа пси-кровососа
-st_data_export_light_attack_power,Сила легкой атаки
-ammo_23x75_barrikada,Патроны 23x75 мм "Баррикада"
-st_af_surge_up_name,Токоограничительный микрореактор
-ui_inv_outfit_speed,Модификатор подвижности
-st_data_export_outfit_artefact_count_max,Максимальное кол-во слотов
-ui_inv_outfit_artefact_count,Кол-во слотов
-st_wpn_m4a1_siber,M4A1 RAS
-ui_mcm_menu_exo,Электропривод экзокостюма
-ui_inv_ap_res,BR разряд
-st_grenade_thermite,Термитная граната
-ui_mm_repair,Отремонтировать
 st_wpn_m4_butcher,Colt М4А1 Мясник
 st_wpn_m4,M4A1 RAS
-st_stalker_letter_2_of_2_name,Мемуары (часть 2 из 2)
+st_drug_radioprotector,Радиопротектор
+st_itm_mapkit_3,Карта аномалий (Рыжий лес)
 st_wpn_m24,M24 SWS «Green Dragon»
-st_leatherman_tool,Мультитул
-st_af_cristall_name,«Кристалл»
+st_af_dummy_dummy_name,«Панцирь»
+st_hide_psysucker_name,Кожа пси-кровососа
 st_wpn_m16a2,M16A2
-st_wpn_gsh18,ГШ-18
+ammo_23x75_barrikada,Патроны 23x75 мм "Баррикада"
+st_af_surge_up_name,Токоограничительный микрореактор
 st_wpn_m16,M16A4
 st_wpn_lr300_custom,Заказная LR-300ML
 st_wpn_lr300_camo,Камуфлированная LR-300ML
+st_wpn_m4a1_siber,M4A1 RAS
 st_wpn_lr300,LR-300ML
-st_mine_name,Осколочная противопехотная мина
 st_wpn_kriss,KRISS Vector
-ui_st_rank,Ранг
+st_grenade_thermite,Термитная граната
 st_wpn_l85a2_modern,Модернизированная L85A2
+st_wpn_l85a2_custom,Заказная L85A2
+st_wpn_l85a2,L85A2
+st_stalker_letter_2_of_2_name,Мемуары (часть 2 из 2)
+st_af_grapes_name,"Виноград"
+st_leatherman_tool,Мультитул
+st_af_cristall_name,«Кристалл»
+st_wpn_l85_m1,L85 A2
+st_wpn_gsh18,ГШ-18
+st_wpn_fn2000_camo,Камуфлированный FN F2000
+st_wpn_l85_alt,L85A1 (Альтернативная)
+isg_outfit_name,Тактический бронежилет ИИГ Mk.1
+st_wpn_ks23_kaban_kab_up,КС-23 Кабан
+st_mine_name,Осколочная противопехотная мина
+MDR,Desert Tech MDR 5.56x45
+ui_st_rank,Ранг
+st_wpn_korth,Korth 4"
 st_data_export_eat_alcohol,Алкоголь
 st_rank_gauss,отряд с гаусс-пушкой
-st_wpn_l85a2_custom,Заказная L85A2
+st_data_export_pelts_quality_max,Максимальное качество шкуры
 st_barrel_10,Ствол [П] 7.62мм
 st_grenade_smoke,Дымовая граната
-st_wpn_l85a2,L85A2
-st_data_export_falloff,Потеря мощности
+st_data_export_cuts_thick_skin,Режет толстую кожу
+st_data_export_falloff,Падение урона
 l12u_control_monolith,Центр управления Монолитом
 st_itm_backpack_name,Полевой рюкзак
 lttz_ll_wpn_gauss_quest_name,«Изделие №62»
 st_sausage,Копчёная колбаса
 st_bolt_carrier_4,Продольно-скользящий затвор с запиранием перекосом (Продольно-скользящий затвор)
 bandit_exo_outfit_name,Украденный экзоскелет
-st_af_grapes_name,"Виноград"
+BR,BR
 st_wpn_aug_a3_custom_bas,Steyr AUG A3 "Коммандос"
 st_wpn_sig550_strelok,SIG SG550 «Arrow»
-st_wpn_fn2000_camo,Камуфлированный FN F2000
-st_wpn_l85_alt,L85A1 (Альтернативная)
-isg_outfit_name,Тактический бронежилет ИИГ Mk.1
+ui_inv_outfit_speed,Модификатор подвижности
+st_data_export_outfit_artefact_count_max,Максимальное кол-во слотов
+ui_inv_outfit_artefact_count,Кол-во слотов
 st_af_fireball_name,«Огненный шар»
 bandit_sun_outfit_name,Тактический комбинезон «Вечерняя заря»
-st_wpn_ks23_kaban_kab_up,КС-23 Кабан
-MDR,Desert Tech MDR 5.56x45
+ui_mcm_menu_exo,Электропривод экзокостюма
+ui_inv_ap_res,BR разряд
 helm_ranger,Противогаз ГП-10Р
-st_wpn_korth,Korth 4"
+ui_mm_repair,Отремонтировать
 st_wpn_ithacam37,Ithaca M37 «Riot»
 merc_fighter_outfit_name,Лёгкий комбинезон «Истребитель»
 st_wpn_rpk,РПК
@@ -870,7 +870,7 @@ st_wpn_bm16_full_alt,ТОЗ-66 (Альтернативный)
 st_wpn_bm16_alt,Улучшенный Обрез ТОЗ-66
 csky_light_novice_outfit_name,Бронежилет ЧН-1а
 ~,~
-st_data_export_limb_duration,Длительность конечности
+st_data_export_limb_duration,Длительность эффекта на конечность
 ammo_20x70_buck,Патроны 20х70 дробь
 st_bolt_carrier_2,Продольно-скользящий затвор с запиранием поворотом (Продольно-скользящий затвор)
 st_af_full_empty_name,«Полная Пустышка»
@@ -902,32 +902,32 @@ st_wpn_ak74u_camo,Камуфлированный АКС-74У
 nbc_outfit_name,Комбинезон РХБЗ
 st_af_bat_name,"Летучая мышь"
 ammo-7.62x25-ps,Патроны 7,62x25 мм Пст
-st_tomahawk,Томагавк Gerber
-st_af_grid_up_name,Титановый элемент каркаса
-st_wpn_sks_molot,СКС Молот
-st_af_electra_moonlight_name,«Лунный свет»
-st_knife_hunting,Охотничий нож
-st_cigarettes,Сигареты «Marlboro»
-st_wpn_sig226,Sig Sauer P226R
-st_af_ring_name,«Белый обруч»
-st_medkit_science,Научная аптечка
-st_helm_rp_bala,Балаклава
-st_device_torch_name,Налобный фонарик
-st_helm_bandana,Бандана
-renegade_exo_outfit_name,Экзоскелет ренегатов
 st_wpn_ak74_old,АК-74
+st_af_grid_up_name,Титановый элемент каркаса
 st_wpn_ak74_n,АК-74
-st_barrel_8,Ствол [А] 5.45мм
+st_af_electra_moonlight_name,«Лунный свет»
 st_wpn_ak74_modern,Модернизированный АК-74
 st_wpn_ak74_alt,АК-74 (Альтернативный)
+st_wpn_sig226,Sig Sauer P226R
+st_af_ring_name,«Белый обруч»
 st_wpn_ak5c_isg,AK 5C ISG
 st_wpn_ak12,АК-12 2012
+st_upgr_w_optical,Комплект улучшения оптического прицела
+st_wpn_ak104,АК-104
+renegade_exo_outfit_name,Экзоскелет ренегатов
+st_wpn_ak103_camo,Камуфлированный АК-103
+st_tomahawk,Томагавк Gerber
+st_barrel_8,Ствол [А] 5.45мм
+st_wpn_sks_molot,СКС Молот
+st_knife_hunting,Охотничий нож
+st_cigarettes,Сигареты «Marlboro»
+st_medkit_science,Научная аптечка
 st_af_aac_name,Прикладной контейнер артефактов (пустой)
 st_prop_restore_health,Восстановление здоровья
-st_upgr_w_optical,Комплект улучшения оптического прицела
+st_helm_rp_bala,Балаклава
 gamma_explosion_cap,Предел Взрыва
-st_wpn_ak104,АК-104
-st_wpn_ak103_camo,Камуфлированный АК-103
+st_device_torch_name,Налобный фонарик
+st_helm_bandana,Бандана
 merc_scientific_outfit_name,Научный комбинезон наёмников
 st_wpn_abakan_camo,Камуфлированный АН-94
 st_wpn_colt1911_duty,Colt M1911 с камуфляжем «Долга»

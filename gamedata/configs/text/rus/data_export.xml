@@ -31,7 +31,7 @@
         <text>Полное восстановление выносливости</text>
     </string>
     <string id="st_data_export_limb_duration">
-        <text>Длительность конечности</text>
+        <text>Длительность эффекта на конечность</text>
     </string>
     <string id="st_data_export_first_aid_head">
         <text>Временно голову</text>
@@ -100,7 +100,7 @@
         <text>Фрагменты</text>
     </string>
     <string id="st_data_fragment_damage">
-        <text>Урон от фрагментов</text>
+        <text>Осколочный урон</text>
     </string>
     <string id="st_data_export_projectiles">
         <text>Снаряды</text>
@@ -109,7 +109,7 @@
         <text>Импульс</text>
     </string>
     <string id="st_data_export_weapon_degradation">
-        <text>Доп. износ оружия</text>
+        <text>Износ оружия</text>
     </string>
     <string id="st_data_export_disassemble_result">
         <text>Результат</text>
@@ -175,10 +175,10 @@
         <text>Можно подобрать?</text>
     </string>
     <string id="st_data_export_falloff">
-        <text>Потеря мощности</text>
+        <text>Падение урона</text>
     </string>
     <string id="st_data_export_stash_map">
-        <text>Уровень</text>
+        <text>Локация</text>
     </string>
     <string id="st_data_export_stash_type">
         <text>Тип схрона</text>
