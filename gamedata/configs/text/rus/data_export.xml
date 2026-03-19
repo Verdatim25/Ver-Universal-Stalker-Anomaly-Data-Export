@@ -198,4 +198,7 @@
     <string id="st_data_export_stash_type_rare">
         <text>Редкий</text>
     </string>
+    <string id="st_data_export_ammo_box_size">
+        <text>В пачке</text>
+    </string>
 </string_table>

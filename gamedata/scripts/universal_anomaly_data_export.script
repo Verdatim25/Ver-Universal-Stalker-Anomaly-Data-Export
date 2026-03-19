@@ -1262,6 +1262,21 @@ function debug_cmd_list.cmd.export_weapons(_, txt, x)
     local id = AC_ID
     local se_obj
 
+    ui_inventory.start("inventory", nil)
+    local GUI = ui_inventory.GUI
+    local slot_cells = GUI.slot_cell
+    local onehanded_slots = {
+        1,4,5,6,8,9
+    }
+    local allowed_slots = {}
+    for _, slot in pairs(onehanded_slots) do
+        local cells = slot_cells[slot]
+        for _, slot_idx in pairs(cells) do
+            allowed_slots[slot_idx] = true
+        end
+    end
+    GUI:Close()
+
     local function process_queue(idx, itr)
         if idx > #sections_queue then
             x:SendOutput("[END] export weapons - %s total exported", cnt)
@@ -1303,8 +1318,10 @@ function debug_cmd_list.cmd.export_weapons(_, txt, x)
             weapon.weight = ini_sys:r_float_ex(section, "inv_weight") or 0
             local repair_type = ini_sys:r_string_ex(section, "repair_type") or ""
             weapon.repair_label = get_weapon_repair_label(repair_type)
-            weapon.single_handed = ini_sys:r_float_ex(section, "single_handed")
-            weapon.single_handed = weapon.single_handed == 1 and "Y" or "N"
+
+            weapon.single_handed = ini_sys:r_float_ex(section, "slot") or -1
+            weapon.single_handed = allowed_slots[weapon.single_handed] and "Y" or "N"
+
             weapon.accuracy = to_percent_floor(get_weapon_stat_value(obj, section, "accuracy"))
             weapon.handling = to_percent_floor(get_weapon_stat_value(obj, section, "handling"))
             weapon.damage = get_weapon_stat_value(obj, section, "damage")
@@ -1757,6 +1774,7 @@ function debug_cmd_list.cmd.export_ammo(_, txt, x)
             local ammo = {}
             ammo.name = sanitize_ammo_name(translate_with_context(ini_sys:r_string_ex(section, "inv_name"), "item name for " .. section))
             ammo.cost = ini_sys:r_float_ex(section, "cost") or 0
+            ammo.box_size = round(ini_sys:r_float_ex(section, "box_size"))
             ammo.weight = ini_sys:r_float_ex(section, "inv_weight") or 0
             ammo.projectiles = ini_sys:r_float_ex(section, "buck_shot") or 1
             ammo.damage = ini_sys:r_float_ex(section, "k_hit") or 0
@@ -1775,11 +1793,11 @@ function debug_cmd_list.cmd.export_ammo(_, txt, x)
     local p_file = "export_ammo.csv"
     local debug_file = io.open(p_file, "w+")
     local header = translate_headers({
-        "~", "pda_encyclopedia_name", "st_prop_weight", "st_upgr_cost", "BR1", "BR2", "BR3", "BR4", "BR5", "BR6", "BR7", "st_data_export_projectiles", "ui_inv_damage", "ui_inv_accuracy", "ui_inv_wrange", "st_data_export_falloff", "ui_inv_bspeed", "st_data_export_impulse", "st_data_export_weapon_degradation" })
+        "~", "pda_encyclopedia_name", "st_prop_weight", "st_data_export_ammo_box_size", "st_upgr_cost", "BR1", "BR2", "BR3", "BR4", "BR5", "BR6", "BR7", "st_data_export_projectiles", "ui_inv_damage", "ui_inv_accuracy", "ui_inv_wrange", "st_data_export_falloff", "ui_inv_bspeed", "st_data_export_impulse", "st_data_export_weapon_degradation" })
     write_file(debug_file, "%s", header)
     for section, v in pairs(tbl) do
-        write_file(debug_file, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
-                section, v.name, v.weight, v.cost, v.br1, v.br2, v.br3, v.br4, v.br5, v.br6, v.br7, v.projectiles, v.damage, v.accuracy, v.range, v.falloff, v.velocity, v.impulse, v.degr
+        write_file(debug_file, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s",
+                section, v.name, v.weight, v.box_size, v.cost, v.br1, v.br2, v.br3, v.br4, v.br5, v.br6, v.br7, v.projectiles, v.damage, v.accuracy, v.range, v.falloff, v.velocity, v.impulse, v.degr
         )
     end
     debug_file:close()
