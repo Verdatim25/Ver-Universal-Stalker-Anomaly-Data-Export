@@ -1399,6 +1399,7 @@ function debug_cmd_list.cmd.export_weapons(_, txt, x)
             end
 
             weapon.alt_caliber = alt_calibers_str
+            weapon.hit_power = ini_sys:r_float_ex(section, "hit_power") or 0
 
             weapon.br1, weapon.br2, weapon.br3, weapon.br4, weapon.br5, weapon.br6, weapon.br7 = get_weapon_br_stats(ammo_class)
             tbl[kind][section] = weapon
@@ -1443,11 +1444,11 @@ function debug_cmd_list.cmd.export_weapons(_, txt, x)
             end
 
             local header = translate_headers({
-                "~", "pda_encyclopedia_name", "st_data_export_description", "st_prop_weight", "st_upgr_cost", "ui_mm_repair", "st_data_export_single_handed", "ui_inv_accuracy", "ui_inv_handling", "ui_inv_damage", "ui_inv_rate_of_fire", "ui_ammo_count", "ui_inv_wrange", "ui_inv_bspeed", "ui_inv_reli", "ui_inv_recoil", "ui_ammo_types", "st_data_export_ammo_types_alt", "BR1", "BR2", "BR3", "BR4", "BR5", "BR6", "BR7" })
+                "~", "pda_encyclopedia_name", "st_data_export_description", "st_prop_weight", "st_upgr_cost", "ui_mm_repair", "st_data_export_single_handed", "ui_inv_accuracy", "ui_inv_handling", "ui_inv_damage", "ui_inv_rate_of_fire", "ui_ammo_count", "ui_inv_wrange", "ui_inv_bspeed", "ui_inv_reli", "ui_inv_recoil", "ui_ammo_types", "st_data_export_ammo_types_alt", "st_data_export_hit_power", "BR1", "BR2", "BR3", "BR4", "BR5", "BR6", "BR7" })
             write_csv(debug_file, header)
             for section, w in pairs(weapons) do
                 write_csv(debug_file,
-                        section, w.name, w.description, w.weight, w.cost, w.repair_label, w.single_handed, w.accuracy, w.handling, w.damage, w.fire_rate, w.ammo_mag_size, w.max_range, w.speed, w.reliability, w.recoil, w.caliber, w.alt_caliber, w.br1, w.br2, w.br3, w.br4, w.br5, w.br6, w.br7)
+                        section, w.name, w.description, w.weight, w.cost, w.repair_label, w.single_handed, w.accuracy, w.handling, w.damage, w.fire_rate, w.ammo_mag_size, w.max_range, w.speed, w.reliability, w.recoil, w.caliber, w.alt_caliber, w.hit_power, w.br1, w.br2, w.br3, w.br4, w.br5, w.br6, w.br7)
                 type_cnt = type_cnt + 1
             end
             debug_file:close()
