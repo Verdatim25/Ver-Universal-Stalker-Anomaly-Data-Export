@@ -16,7 +16,7 @@ local cmd_list = {
     { name = "Export toolkit map rates", cmd = "export_toolkit_map_rates", hide_ui = 0 },
     { name = "Export upgrades", cmd = "export_upgrades", hide_ui = 0 },
     { name = "Export item icons", cmd = "export_item_icons", hide_ui = 0 },
-    { name = "Export item drop locations", cmd = "item_drop_locations", hide_ui = 0 },
+    { name = "Export item drop locations", cmd = "export_item_drop_locations", hide_ui = 0 },
     { name = "Export disassemble table", cmd = "export_disassemble_table", hide_ui = 0 },
     { name = "Export outfit exchange table", cmd = "export_outfit_exchange", hide_ui = 0 },
     { name = "Export mutant parts prices", cmd = "export_mutant_parts_prices", hide_ui = 0 },
@@ -2954,7 +2954,7 @@ function debug_cmd_list.cmd.export_item_icons(_, txt, x)
     x:SendOutput("[END] export item icons - %s sections written - see export_item_icons.csv", cnt)
 end
 
-function debug_cmd_list.cmd.item_drop_locations(_, txt, x)
+function debug_cmd_list.cmd.export_item_drop_locations(_, txt, x)
     x:SendOutput("[START] export stash drop rates by item")
 
     -- Load config files
@@ -3070,7 +3070,7 @@ function debug_cmd_list.cmd.item_drop_locations(_, txt, x)
     end
 
     -- Open output file and write header
-    local p_file = "item_drop_locations.csv"
+    local p_file = "export_item_drop_locations.csv"
     local out = io.open(p_file, "w+")
 
     local header = translate_headers({
@@ -3103,7 +3103,7 @@ function debug_cmd_list.cmd.item_drop_locations(_, txt, x)
     end
 
     out:close()
-    x:SendOutput("[END] export stash drop rates by item - %s rows written - see item_drop_locations.csv", row_count)
+    x:SendOutput("[END] export stash drop rates by item - %s rows written - see export_item_drop_locations.csv", row_count)
 end
 
 function debug_cmd_list.cmd.export_npc_armor_profiles(_, txt, x)
