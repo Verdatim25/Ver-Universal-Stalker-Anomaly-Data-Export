@@ -249,4 +249,7 @@
     <string id="st_data_export_visual_item_id">
         <text>Item ID</text>
     </string>
+    <string id="st_data_export_zoom_factor">
+        <text>Zoom Factor</text>
+    </string>
 </string_table>
