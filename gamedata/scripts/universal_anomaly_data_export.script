@@ -1,6 +1,9 @@
 local cmd_list = {
     {name = "Change headers mode", cmd = "change_headers_mode", hide_ui = 0},
     { name = "Export outfits", cmd = "export_outfits", hide_ui = 0 },
+    { name = "Export mag capacity", cmd = "export_mag_capacity", hide_ui = 0 },
+    { name = "Export magazine info", cmd = "export_magazine_info", hide_ui = 0 },
+    { name = "Export weapon magazine map", cmd = "export_weapon_magazine_map", hide_ui = 0 },
     { name = "Export eatable", cmd = "export_eatable", hide_ui = 0 },
     { name = "Export medicine", cmd = "export_medicine", hide_ui = 0 },
     { name = "Export artefacts", cmd = "export_artefacts", hide_ui = 0 },
@@ -634,6 +637,148 @@ function debug_cmd_list.cmd.export_outfits(_, txt, x)
         send_log(x, "[END] export outfit - %s total outfits exported", cnt)
         return true
     end)
+end
+
+-- Export magazine carry capacity granted by gear from "GAMMA Mags Reloaded":
+-- outfits (slot 7), backpacks (slot 13) and belt mag-pouch artefacts. In-game these
+-- stack additively into the player's small/medium/large slot totals.
+--
+-- The mod stores mag_limit_small/medium/large in a parallel lookup table
+-- (magazines\lookups.ltx) keyed by section, NOT in the items' own configs, so it
+-- can't be read via ini_sys. We reuse the mod's own resolver
+-- (magazine_binder.get_loadout_slots) so explicit values, ":base" inheritance and
+-- the outfit kind -> o_none fallback all match the game exactly. Every provider is
+-- already in the lookup, so the resolver returns 0/0/0 for anything that isn't one
+-- (we skip those). If the mod isn't installed, magazine_binder is nil and we skip
+-- cleanly without writing a file.
+function debug_cmd_list.cmd.export_mag_capacity(_, txt, x)
+    send_log(x, "[START] export mag capacity")
+
+    if not (magazine_binder and magazine_binder.get_loadout_slots) then
+        send_log(x, "[SKIP] export mag capacity - GAMMA Mags Reloaded not installed")
+        return
+    end
+
+    -- Body-outfit classes only (worn in slot 7). Helmets carry no magazines and
+    -- aren't in the lookup, so they naturally resolve to 0/0/0 and are skipped.
+    local outfit_cls = {
+        ["o_light"] = true,
+        ["E_STLK"] = true,
+        ["EQU_STLK"] = true,
+        ["o_medium"] = true,
+        ["o_sci"] = true,
+        ["o_heavy"] = true,
+    }
+    local blacklist = {
+        ["outfit_base"] = true,
+        ["without_outfit"] = true,
+        ["mp_scientific_outfit"] = true,
+    }
+
+    local tbl = {}
+    local cnt = 0
+    ini_sys:section_for_each(function(section)
+        if blacklist[section] or is_multiplayer_item(section) then
+            return
+        end
+
+        local class = ini_sys:r_string_ex(section, "class")
+        local kind = ini_sys:r_string_ex(section, "kind")
+        if kind then class = kind end
+        local is_outfit = class and outfit_cls[class]
+
+        -- force_outfit=true (outfits only) so outfits not explicitly listed still
+        -- resolve via their kind (o_light/o_medium/...) and ultimately o_none.
+        -- For non-outfits, the resolver returns 0/0/0 unless the section is a
+        -- recognised provider (backpack / mag-pouch artefact) in the lookup.
+        local s, m, l = magazine_binder.get_loadout_slots(section, false, is_outfit and true or false)
+        s, m, l = s or 0, m or 0, l or 0
+        if not is_outfit and (s + m + l) == 0 then
+            return -- not an outfit and grants no slots: not a capacity provider
+        end
+
+        local provider = is_outfit and "outfit"
+            or (section:find("^af_") and "magpouch")
+            or "backpack"
+
+        tbl[section] = {
+            name = translate_with_context(ini_sys:r_string_ex(section, "inv_name"), "item name for " .. section),
+            provider = provider,
+            small = s,
+            medium = m,
+            large = l,
+        }
+        cnt = cnt + 1
+    end)
+
+    local p_file = "export_mag_capacity.csv"
+    local debug_file = file_for_write(p_file)
+    if debug_file == nil then
+        send_log(x, "Failed to create/open file %s", p_file)
+        return
+    end
+    local header = translate_headers({
+        "~", "pda_encyclopedia_name", "st_data_export_mag_provider",
+        "st_data_export_mag_limit_small", "st_data_export_mag_limit_medium", "st_data_export_mag_limit_large",
+    })
+    write_csv_header(debug_file, header)
+    for _, section in ipairs(sort_keys(tbl)) do
+        local v = tbl[section]
+        write_csv(debug_file, section, v.name, v.provider, v.small, v.medium, v.large)
+    end
+    debug_file:close()
+    send_log(x, "[END] export mag capacity - %s providers exported - see %s", cnt, p_file)
+end
+
+-- Per-magazine size class (small/medium/large) and round capacity. The Magazines
+-- mod (GAMMA Mags Reloaded) tags every magazine item with `mag_size` and
+-- `max_mag_size`; neither rides along in items_common_data, so emit them here.
+-- Magazines are II_ATTCH attachments flagged `is_mag`. No-ops when the mod is absent.
+function debug_cmd_list.cmd.export_magazine_info(_, txt, x)
+    send_log(x, "[START] export magazine info")
+
+    local tbl = {}
+    local cnt = 0
+    ini_sys:section_for_each(function(section)
+        if is_multiplayer_item(section) then
+            return
+        end
+        if ini_sys:r_string_ex(section, "class") ~= "II_ATTCH" then
+            return
+        end
+        if not ini_sys:r_bool_ex(section, "is_mag", false) then
+            return
+        end
+
+        tbl[section] = {
+            name = translate_with_context(ini_sys:r_string_ex(section, "inv_name"), "item name for " .. section),
+            mag_size = ini_sys:r_string_ex(section, "mag_size") or "",
+            max_mag_size = round(ini_sys:r_float_ex(section, "max_mag_size") or 0),
+        }
+        cnt = cnt + 1
+    end)
+
+    if cnt == 0 then
+        send_log(x, "[SKIP] export magazine info - GAMMA Mags Reloaded not installed (no magazine items found)")
+        return
+    end
+
+    local p_file = "export_magazine_info.csv"
+    local debug_file = file_for_write(p_file)
+    if debug_file == nil then
+        send_log(x, "Failed to create/open file %s", p_file)
+        return
+    end
+    local header = translate_headers({
+        "~", "pda_encyclopedia_name", "st_data_export_mag_size", "st_data_export_max_mag_size",
+    })
+    write_csv_header(debug_file, header)
+    for _, section in ipairs(sort_keys(tbl)) do
+        local v = tbl[section]
+        write_csv(debug_file, section, v.name, v.mag_size, v.max_mag_size)
+    end
+    debug_file:close()
+    send_log(x, "[END] export magazine info - %s magazines exported - see %s", cnt, p_file)
 end
 
 function file_exists(name)
@@ -1501,6 +1646,54 @@ function is_weapon_modification(section)
         end
     end
     return false
+end
+
+-- Weapon → compatible magazines (GAMMA Mags Reloaded). A magazine fits a weapon
+-- when they share a base_type; resolve via the binder's own lookups so it always
+-- matches in-game behaviour. One row per weapon: section, mag_id, mag_id, ...
+-- No-ops cleanly when the mod isn't installed.
+function debug_cmd_list.cmd.export_weapon_magazine_map(_, txt, x)
+    send_log(x, "[START] export weapon magazine map")
+
+    if not (magazine_binder and magazine_binder.get_weapon_base_type and magazine_binder.get_mags_for_basetype) then
+        send_log(x, "[SKIP] export weapon magazine map - GAMMA Mags Reloaded not installed")
+        return
+    end
+
+    local sections_queue = {}
+    ini_sys:section_for_each(function(section)
+        local kind = ini_sys:r_string_ex(section, "kind")
+        local class = ini_sys:r_string_ex(section, "class")
+        if kind == "" then kind = class end
+        if kind and weapon_kinds[kind] and not is_weapon_modification(section) and not is_multiplayer_item(section) then
+            table.insert(sections_queue, section)
+        end
+    end)
+    table.sort(sections_queue)
+
+    local f = file_for_write("export_weapon_magazine_map.csv")
+    local cnt = 0
+    for _, section in ipairs(sections_queue) do
+        -- pcall: get_weapon_base_type touches ammo data and can throw on odd weapons
+        local ok, bt = pcall(magazine_binder.get_weapon_base_type, section)
+        if ok and bt then
+            local mags = magazine_binder.get_mags_for_basetype(bt) or {}
+            local row = { section }
+            local seen = {}
+            for _, mag in ipairs(mags) do
+                if mag and not seen[mag] then
+                    seen[mag] = true
+                    table.insert(row, mag)
+                end
+            end
+            if #row > 1 then
+                write_csv(f, unpack(row))
+                cnt = cnt + 1
+            end
+        end
+    end
+    f:close()
+    send_log(x, "[END] export weapon magazine map - %s weapons mapped - see export_weapon_magazine_map.csv", cnt)
 end
 
 function debug_cmd_list.cmd.export_weapons(_, txt, x)
