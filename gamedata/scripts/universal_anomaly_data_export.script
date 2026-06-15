@@ -116,8 +116,12 @@ function get_real_stat_value_display(upgrade_section, value, stat_type, type)
     elseif stat_type == "outfit" then
         if type:find("_protection") then
             local adb_type = utils_ui.stats_table[stat_type][type]["value_functor"][3]
-            grok_actor_damage_balancer.get_adb_constants(adb_type)
-            local adjuster = grok_actor_damage_balancer.adjuster or 0
+            -- grok_actor_damage_balancer is an optional GAMMA mod; absent on plain Anomaly.
+            local adjuster = 0
+            if grok_actor_damage_balancer then
+                grok_actor_damage_balancer.get_adb_constants(adb_type)
+                adjuster = grok_actor_damage_balancer.adjuster or 0
+            end
 
             if type == "fire_wound_protection" then
                 local bones_add = ini_sys:r_string_ex(upgrade_section, "bones_koeff_protection_add", "", "") or ""
@@ -570,9 +574,10 @@ function debug_cmd_list.cmd.export_outfits(_, txt, x)
                 outfit.ballistic = to_percent_floor(get_outfit_stat_value(obj, section, "fire_wound_protection"))
                 outfit.br_class = round(get_outfit_stat_value(obj, section, "apres_modifier"))
 
-                outfit.powered = item_exo_device.is_exo(obj) and "Y" or "N"
+                -- item_exo_device / outfit_speed_mcm are optional GAMMA mods; absent on plain Anomaly.
+                outfit.powered = (item_exo_device and item_exo_device.is_exo(obj)) and "Y" or "N"
 
-                outfit.speed = decimal_to_percent(outfit_speed_mcm.get_outfit_speed(obj, section, false))
+                outfit.speed = outfit_speed_mcm and decimal_to_percent(outfit_speed_mcm.get_outfit_speed(obj, section, false)) or decimal_to_percent(0)
 
                 tbl[repair_type][section] = outfit
                 alife_release(se_obj)
@@ -602,8 +607,8 @@ function debug_cmd_list.cmd.export_outfits(_, txt, x)
             local debug_file = file_for_write(p_file)
 
             if (debug_file == nil) then
+                -- Can't close a handle we never got; just skip this file.
                 send_log(x, "Failed to create/open file %s", p_file)
-                debug_file:close()
                 return true
             end
 
@@ -1009,7 +1014,7 @@ function build_bhs_summary(t_name, sec)
     local arm = 0
     local leg = 0
     local timeregen = 0
-    if sec and t_name[sec] then
+    if sec and t_name and t_name[sec] then
         for limb, val in pairs(t_name[sec]) do
             if limb == "head" then
                 head = val
@@ -1177,8 +1182,9 @@ function debug_cmd_list.cmd.export_medicine(_, txt, x)
 
             eatable.weight_carried = floor_with_precision(ini_sys:r_float_ex(section, "boost_max_weight") or 0)
 
-            eatable.perm_head, eatable.perm_torso, eatable.perm_arm, eatable.perm_leg, eatable.perm_timeregen = build_bhs_summary(zzz_player_injuries.healhelp, section)
-            eatable.temp_head, eatable.temp_torso, eatable.temp_arm, eatable.temp_leg, eatable.hp_active = build_bhs_summary(zzz_player_injuries.medkits, section)
+            -- zzz_player_injuries is an optional GAMMA mod; absent on plain Anomaly (build_bhs_summary tolerates nil).
+            eatable.perm_head, eatable.perm_torso, eatable.perm_arm, eatable.perm_leg, eatable.perm_timeregen = build_bhs_summary(zzz_player_injuries and zzz_player_injuries.healhelp, section)
+            eatable.temp_head, eatable.temp_torso, eatable.temp_arm, eatable.temp_leg, eatable.hp_active = build_bhs_summary(zzz_player_injuries and zzz_player_injuries.medkits, section)
 
             eatable.used_in_crafting = used_in_crafting[section] and "Y" or "N"
             eatable.craftable = craftable[section] and "Y" or "N"
@@ -1208,7 +1214,7 @@ end
 function get_perk_artifacts_list()
     local perk_artefacts = {}
 
-    for i, v in pairs(perk_based_artefacts) do
+    for i, v in pairs(perk_based_artefacts or {}) do
         if type(v) == "table" and string.find(i, "artefact_on_") then
             for j, k in pairs(v) do
                 perk_artefacts[j] = "st_pba_" .. j .. "_perk"
@@ -1862,8 +1868,8 @@ function debug_cmd_list.cmd.export_weapons(_, txt, x)
             local debug_file = file_for_write(p_file)
 
             if (debug_file == nil) then
+                -- Can't close a handle we never got; just skip this file.
                 send_log(x, "Failed to create/open file %s", p_file)
-                debug_file:close()
                 return true
             end
 
@@ -2016,8 +2022,8 @@ function debug_cmd_list.cmd.export_melee(_, txt, x)
             local debug_file = file_for_write(p_file)
 
             if (debug_file == nil) then
+                -- Can't close a handle we never got; just skip this file.
                 send_log(x, "Failed to create/open file %s", p_file)
-                debug_file:close()
                 return true
             end
 
@@ -3640,6 +3646,12 @@ end
 
 function debug_cmd_list.cmd.export_npc_armor_profiles(_, txt, x)
     send_log(x, "[START] export NPC armor profiles")
+
+    -- grok_bo (bones overhaul) is an optional GAMMA mod; this exporter needs it.
+    if not (grok_bo and grok_bo.ini_bones) then
+        send_log(x, "[SKIP] export NPC armor profiles - grok bones overhaul (GAMMA) not installed")
+        return
+    end
 
     local ini_bp = grok_bo.ini_bones
     local ini_capture = grok_bo.ini_capture
