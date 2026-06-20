@@ -20,7 +20,7 @@ local cmd_list = {
     { name = "Export item icons", cmd = "export_item_icons", hide_ui = 0 },
     { name = "Export item drop locations", cmd = "export_item_drop_locations", hide_ui = 0 },
     { name = "Export disassemble table", cmd = "export_disassemble_table", hide_ui = 0 },
-    { name = "Export weapon parts", cmd = "export_weapon_parts", hide_ui = 0 },
+    { name = "Export item parts", cmd = "export_item_parts", hide_ui = 0 },
     { name = "Export outfit exchange table", cmd = "export_outfit_exchange", hide_ui = 0 },
     { name = "Export mutant parts prices", cmd = "export_mutant_parts_prices", hide_ui = 0 },
     { name = "Export mutant profiles", cmd = "export_mutant_profiles", hide_ui = 0 },
@@ -2409,20 +2409,42 @@ end
 -- only via inheritance, but ini_sys (the merged system ini) resolves that. We emit the
 -- part section id (it preserves the tier suffix -- several tiers share one display name)
 -- alongside the translated name.
-function debug_cmd_list.cmd.export_weapon_parts(_, txt, x)
-    send_log(x, "[START] export weapon parts")
+-- WPO's con_parts_list covers anything with physical components: both weapons and
+-- outfits/helmets. Classify each owner by its class so downstream can tell them apart
+-- (the same part sections, e.g. prt_w_*/prt_o_*, otherwise look interchangeable).
+local part_owner_outfit_cls = {
+    ["o_helmet"] = true, ["E_HLMET"] = true, ["EQU_HLMET"] = true,
+    ["o_light"] = true,
+    ["E_STLK"] = true, ["EQU_STLK"] = true,
+    ["o_medium"] = true, ["o_sci"] = true, ["o_heavy"] = true,
+}
+local function part_owner_kind(section)
+    local class = ini_sys:r_string_ex(section, "class")
+    if not class then return "other" end
+    if part_owner_outfit_cls[class] then return "outfit" end
+    if class:sub(1, 3) == "WP_" then return "weapon" end
+    return "other"
+end
+
+function debug_cmd_list.cmd.export_item_parts(_, txt, x)
+    send_log(x, "[START] export item parts")
 
     local ini_parts = itms_manager and itms_manager.ini_parts
     if not ini_parts then
-        send_log(x, "[SKIP] export weapon parts - itms_manager.ini_parts not available (Weapon Parts Overhaul not installed)")
+        send_log(x, "[SKIP] export item parts - itms_manager.ini_parts not available (Weapon Parts Overhaul not installed)")
         return
     end
     if not ini_parts:section_exist("con_parts_list") then
-        send_log(x, "[SKIP] export weapon parts - con_parts_list section not found (Weapon Parts Overhaul not installed)")
+        send_log(x, "[SKIP] export item parts - con_parts_list section not found (Weapon Parts Overhaul not installed)")
         return
     end
 
+    -- Normalized output: tbl maps each item to its kind + ordered list of part ids;
+    -- part_defs holds each unique part's fields once (the same part is shared by many
+    -- items, so storing fields per-reference would duplicate them ~14x). The site joins
+    -- the two by part id.
     local tbl = {}
+    local part_defs = {}
     local max_parts = 0
     local cnt = 0
     ini_sys:section_for_each(function(section)
@@ -2431,13 +2453,24 @@ function debug_cmd_list.cmd.export_weapon_parts(_, txt, x)
             return
         end
 
-        local row = { name = translate_with_context(ini_sys:r_string_ex(section, "inv_name"), "item name for " .. section), parts = {} }
+        local row = {
+            name = translate_with_context(ini_sys:r_string_ex(section, "inv_name"), "item name for " .. section),
+            kind = part_owner_kind(section),
+            parts = {},
+        }
         for _, part in ipairs(str_explode(partsRaw, ",")) do
             local part_section = part and part:trim() or ""
             if part_section ~= "" and ini_sys:section_exist(part_section) then
-                local part_name = translate_with_context(ini_sys:r_string_ex(part_section, "inv_name"), "item name for " .. part_section)
-                row.parts[#row.parts + 1] = { id = part_section, name = part_name }
+                row.parts[#row.parts + 1] = part_section
                 icon_candidates[part_section] = true
+                if not part_defs[part_section] then
+                    part_defs[part_section] = {
+                        name = translate_with_context(ini_sys:r_string_ex(part_section, "inv_name"), "item name for " .. part_section),
+                        descr = (translate_with_context(ini_sys:r_string_ex(part_section, "description"), "description for " .. part_section) or ""):sanitize(),
+                        cost = ini_sys:r_float_ex(part_section, "cost") or 0,
+                        weight = floor_with_precision(ini_sys:r_float_ex(part_section, "inv_weight") or 0),
+                    }
+                end
             end
         end
 
@@ -2448,39 +2481,54 @@ function debug_cmd_list.cmd.export_weapon_parts(_, txt, x)
             if #row.parts > max_parts then
                 max_parts = #row.parts
             end
-            send_log(x, "export weapon parts - %s, %s parts", section, #row.parts)
+            send_log(x, "export item parts - %s (%s), %s parts", section, row.kind, #row.parts)
         end
     end)
 
-    local p_file = "export_weapon_parts.csv"
+    -- File 1: item -> kind + part-id mapping. Wide row padded to the widest item seen.
+    local p_file = "export_item_parts.csv"
     local debug_file = file_for_write(p_file)
     if debug_file == nil then
         send_log(x, "Failed to create/open file %s", p_file)
         return
     end
 
-    -- Wide format mirroring the disassemble table: weapon id, weapon name, then a
-    -- (part section, part name) pair per component. Header is padded to the widest
-    -- weapon seen so every emitted column is labeled.
-    local header_cols = { "~", "pda_encyclopedia_name" }
+    local header_cols = { "~", "pda_encyclopedia_name", "st_data_export_part_kind" }
     for i = 1, math.max(max_parts, 1) do
         header_cols[#header_cols + 1] = "st_data_export_part"
-        header_cols[#header_cols + 1] = "st_data_export_part_name"
     end
     write_csv_header(debug_file, translate_headers(header_cols))
 
     for _, section in ipairs(sort_keys(tbl)) do
         local row = tbl[section]
-        local cols = { section, row.name }
-        for _, part in ipairs(row.parts) do
-            cols[#cols + 1] = part.id
-            cols[#cols + 1] = part.name
+        local cols = { section, row.name, row.kind }
+        for _, part_id in ipairs(row.parts) do
+            cols[#cols + 1] = part_id
         end
         write_csv(debug_file, unpack(cols))
     end
     debug_file:close()
 
-    send_log(x, "[END] export weapon parts - %s weapons exported - see %s", cnt, p_file)
+    -- File 2: one row per unique part section with its standard fields.
+    local d_file = "export_item_part_defs.csv"
+    local defs_file = file_for_write(d_file)
+    if defs_file == nil then
+        send_log(x, "Failed to create/open file %s", d_file)
+        return
+    end
+
+    write_csv_header(defs_file, translate_headers(
+        { "~", "pda_encyclopedia_name", "st_data_export_description", "st_upgr_cost", "st_prop_weight" }))
+
+    local part_cnt = 0
+    for _, part_id in ipairs(sort_keys(part_defs)) do
+        local d = part_defs[part_id]
+        write_csv(defs_file, part_id, d.name, d.descr, d.cost, d.weight)
+        part_cnt = part_cnt + 1
+    end
+    defs_file:close()
+
+    send_log(x, "[END] export item parts - %s items, %s unique parts - see %s / %s", cnt, part_cnt, p_file, d_file)
 end
 
 function debug_cmd_list.cmd.export_outfit_exchange(_, txt, x)
